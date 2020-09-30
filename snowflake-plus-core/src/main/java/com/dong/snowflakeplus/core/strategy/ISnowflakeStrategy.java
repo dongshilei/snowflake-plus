@@ -11,5 +11,5 @@ import com.dong.snowflakeplus.core.entity.Snowflake;
  **/
 public interface ISnowflakeStrategy {
 
-    public Snowflake snowflake();
+    public Snowflake snowflake() throws Exception;
 }
