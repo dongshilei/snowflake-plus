@@ -12,6 +12,7 @@
 4、使用workerId和datacenterId构造SnowflakeIdWorker，可保证不同服务器之间产生的ID不同
 5、应用停掉后，断开与zookeeper的连接，临时有序节点和临时节点被清除，又可以被后续应用使用。
 
+ID生成效率  大于 4000000个/s
 
 事件：
 20200930
