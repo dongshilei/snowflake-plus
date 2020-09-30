@@ -35,12 +35,28 @@ public class ZookeeperHandlerTest {
         idProducer.build();
     }
 
+    /**
+     *  测试nextId
+     */
     @Test
     public void snowflake() {
         for (int i=0;i<5;i++) {
-            long id = idProducer.id();
+            long id = idProducer.nextId();
             log.info("当前snowflakeId:{}",id);
         }
         while (true);
+    }
+
+    /**
+     * 测试advancedId
+     * @throws Exception
+     */
+    @Test
+    public void test() throws Exception {
+        while (true){
+            long id = idProducer.advancedId();
+            log.info("当前snowflakeId:{}",id);
+            Thread.sleep(1000);
+        }
     }
 }
