@@ -1,5 +1,7 @@
 package com.dong.snowflakeplus.temp.test;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.TimeInterval;
 import com.dong.snowflakeplus.core.IdProducer;
 import com.dong.snowflakeplus.core.strategy.ISnowflakeStrategy;
 import com.dong.snowflakeplus.core.strategy.ZookeeperStrategy;
@@ -39,7 +41,7 @@ public class ZookeeperHandlerTest {
      *  测试nextId
      */
     @Test
-    public void snowflake() {
+    public void testNextId() {
         for (int i=0;i<5;i++) {
             long id = idProducer.nextId();
             log.info("当前snowflakeId:{}",id);
@@ -52,11 +54,28 @@ public class ZookeeperHandlerTest {
      * @throws Exception
      */
     @Test
-    public void test() throws Exception {
+    public void testAdvancedId() throws Exception {
         while (true){
             long id = idProducer.advancedId();
             log.info("当前snowflakeId:{}",id);
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         }
+    }
+
+    /**
+     * 测试效率
+     * 结果 > 4000000/s
+     * @throws Exception
+     */
+    @Test
+    public void testEfficiency() throws Exception {
+        TimeInterval timer = DateUtil.timer();
+        for (int i = 0;i <4000000;i++){
+            idProducer.advancedId();
+        }
+        long interval = timer.interval();
+        log.info("生成1000000 id花费时间：{}毫秒",interval);
+
+        Thread.sleep(2000);
     }
 }

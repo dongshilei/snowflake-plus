@@ -19,7 +19,7 @@ public class IdProducer {
 
     private SnowflakeIdWorker snowflakeIdWorker;
 
-    public static Long snowflakeId = 0L;
+    public static Long lastTimestamp = 0L;
 
     public IdProducer(ISnowflakeStrategy snowflakeStrategy) {
         this.snowflakeStrategy = snowflakeStrategy;
@@ -46,21 +46,17 @@ public class IdProducer {
      * @return
      */
     public synchronized long advancedId() throws Exception {
-        if (snowflakeId == 0) {
+        long timestamp = System.currentTimeMillis();
+        if (lastTimestamp == 0 || timestamp >= lastTimestamp) {
             //首次使用，不需要判断是否回拨
-            snowflakeId = snowflakeIdWorker.nextId();
         } else {
-            long nextId = snowflakeIdWorker.nextId();
-            if (nextId < snowflakeId) {
-                // 有可能发生了时钟回拨
-                log.warn("有可能发生了时钟回拨");
-                build();
-                snowflakeId = snowflakeIdWorker.nextId();
-            } else {
-                snowflakeId = nextId;
-            }
+            // 发生了时钟回拨
+            log.warn("Clock moved backwards");
+            //重置 snowflake
+            build();
         }
-        return snowflakeId;
+        lastTimestamp = timestamp;
+        return snowflakeIdWorker.nextIdNoCheck();
     }
 
     /**
