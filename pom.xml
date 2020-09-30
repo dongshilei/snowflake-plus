@@ -8,7 +8,6 @@
     <version>0.0.1-SNAPSHOT</version>
     <modules>
         <module>snowflake-plus-core</module>
-        <module>snowflake-plus-template</module>
         <module>snowflake-plus-temp</module>
 
     </modules>
