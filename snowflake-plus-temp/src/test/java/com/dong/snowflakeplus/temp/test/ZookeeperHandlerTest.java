@@ -41,26 +41,14 @@ public class ZookeeperHandlerTest {
      *  测试nextId
      */
     @Test
-    public void testNextId() {
-        for (int i=0;i<5;i++) {
-            long id = idProducer.nextId();
-            log.info("当前snowflakeId:{}",id);
-        }
-        while (true);
-    }
-
-    /**
-     * 测试advancedId
-     * @throws Exception
-     */
-    @Test
-    public void testAdvancedId() throws Exception {
+    public void testNextId() throws Exception {
         while (true){
-            long id = idProducer.advancedId();
+            long id = idProducer.nextId();
             log.info("当前snowflakeId:{}",id);
             Thread.sleep(2000);
         }
     }
+
 
     /**
      * 测试效率
@@ -71,11 +59,10 @@ public class ZookeeperHandlerTest {
     public void testEfficiency() throws Exception {
         TimeInterval timer = DateUtil.timer();
         for (int i = 0;i <4000000;i++){
-            idProducer.advancedId();
+            idProducer.nextId();
         }
         long interval = timer.interval();
-        log.info("生成1000000 id花费时间：{}毫秒",interval);
-
+        log.info("生成4000000 id花费时间：{}毫秒",interval);
         Thread.sleep(2000);
     }
 }

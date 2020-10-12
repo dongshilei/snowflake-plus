@@ -19,8 +19,6 @@ public class IdProducer {
 
     private SnowflakeIdWorker snowflakeIdWorker;
 
-    public static Long lastTimestamp = 0L;
-
     public IdProducer(ISnowflakeStrategy snowflakeStrategy) {
         this.snowflakeStrategy = snowflakeStrategy;
     }
@@ -35,29 +33,26 @@ public class IdProducer {
         snowflakeIdWorker = new SnowflakeIdWorker(snowflake.getWorkerId(), snowflake.getDatacenterId());
     }
 
-    public long nextId() {
+    /**
+     * 获取ID
+     * 当发生系统时钟回拨后，自动调整Snowflake
+     * @return
+     * @throws Exception
+     */
+    public synchronized long nextId() throws Exception {
+        try {
+             return snowflakeIdWorker.nextId();
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("backwards")){
+                // 发生了时钟回拨
+                log.warn(e.getMessage());
+                //重置 snowflake
+                build();
+            }
+        }
         return snowflakeIdWorker.nextId();
     }
 
-    /**
-     * 获得下一个ID (该方法是线程安全的)
-     * 高级的ID，当发生系统时钟回拨后，自动调整Snowflake
-     *
-     * @return
-     */
-    public synchronized long advancedId() throws Exception {
-        long timestamp = System.currentTimeMillis();
-        if (lastTimestamp == 0 || timestamp >= lastTimestamp) {
-            //首次使用，不需要判断是否回拨
-        } else {
-            // 发生了时钟回拨
-            log.warn("Clock moved backwards");
-            //重置 snowflake
-            build();
-        }
-        lastTimestamp = timestamp;
-        return snowflakeIdWorker.nextIdNoCheck();
-    }
 
     /**
      * 支持单独获取Snowflake，建议在IdProducer构建后调用一次
