@@ -14,7 +14,8 @@ import static org.apache.zookeeper.ZooDefs.Ids.OPEN_ACL_UNSAFE;
 
 /**
  * @program: snowflake-plus
- * @description
+ * @description 利用zookeeper特性，组装Snowflake，能避免时钟回拨时发生ID重复问题
+ * 推荐使用
  * @author: DONGSHILEI
  * @create: 2020/9/25 22:46
  **/

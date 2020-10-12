@@ -3,6 +3,7 @@ package com.dong.snowflakeplus.core;
 
 import com.dong.snowflakeplus.core.entity.Snowflake;
 import com.dong.snowflakeplus.core.strategy.ISnowflakeStrategy;
+import com.dong.snowflakeplus.core.strategy.ZookeeperStrategy;
 import com.dong.snowflakeplus.core.worker.SnowflakeIdWorker;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,7 +36,7 @@ public class IdProducer {
 
     /**
      * 获取ID
-     * 当发生系统时钟回拨后，自动调整Snowflake
+     * 当发生系统时钟回拨后，如果使用了zookeeper策略，系统自动调整Snowflake
      * @return
      * @throws Exception
      */
@@ -43,11 +44,14 @@ public class IdProducer {
         try {
              return snowflakeIdWorker.nextId();
         } catch (RuntimeException e) {
-            if (e.getMessage().contains("backwards")){
-                // 发生了时钟回拨
+            if (e.getMessage().contains("backwards")
+                    &&snowflakeStrategy instanceof ZookeeperStrategy){
+                // 发生了时钟回拨 且使用了zookeeper策略
                 log.warn(e.getMessage());
                 //重置 snowflake
                 build();
+            } else {
+                throw  e;
             }
         }
         return snowflakeIdWorker.nextId();
