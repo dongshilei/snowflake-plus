@@ -2,8 +2,8 @@ package com.dong.snowflakeplus.core;
 
 
 import com.dong.snowflakeplus.core.entity.Snowflake;
+import com.dong.snowflakeplus.core.exception.ClockMovedBackwardsException;
 import com.dong.snowflakeplus.core.strategy.ISnowflakeStrategy;
-import com.dong.snowflakeplus.core.strategy.ZookeeperStrategy;
 import com.dong.snowflakeplus.core.worker.SnowflakeIdWorker;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,16 +43,11 @@ public class IdProducer {
     public synchronized long nextId() throws Exception {
         try {
              return snowflakeIdWorker.nextId();
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("backwards")
-                    &&snowflakeStrategy instanceof ZookeeperStrategy){
-                // 发生了时钟回拨 且使用了zookeeper策略
-                log.warn(e.getMessage());
-                //重置 snowflake
-                build();
-            } else {
-                throw  e;
-            }
+        } catch (ClockMovedBackwardsException e) {
+            // 发生了时钟回拨 且使用了zookeeper策略
+            log.warn(e.getMessage());
+            //重置 snowflake
+            build();
         }
         return snowflakeIdWorker.nextId();
     }

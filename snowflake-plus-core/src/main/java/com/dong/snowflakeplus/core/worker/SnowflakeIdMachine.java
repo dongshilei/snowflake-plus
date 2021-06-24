@@ -1,5 +1,7 @@
 package com.dong.snowflakeplus.core.worker;
 
+import com.dong.snowflakeplus.core.exception.ClockMovedBackwardsException;
+
 /**
  * Twitter_Snowflake<br>
  * SnowFlake的结构如下(每部分用-分开):<br>
@@ -15,8 +17,8 @@ package com.dong.snowflakeplus.core.worker;
 public class SnowflakeIdMachine {
 
     // ==============================Fields===========================================
-    /** 开始时间截 (2015-01-01) */
-    private final long twepoch = 1420041600000L;
+    /** 开始时间截 (2020-01-01 00:00:00:000) */
+    private final long twepoch = 1577808000000L;
 
     /** 机器id所占的位数 */
     private final long machineIdBits = 10L;
@@ -26,9 +28,6 @@ public class SnowflakeIdMachine {
 
     /** 序列在id中占的位数 */
     private final long sequenceBits = 12L;
-
-    /** 机器ID向左移12位 */
-    private final long workerIdShift = sequenceBits;
 
 
     /** 时间截向左移22位(10+12) */
@@ -63,13 +62,12 @@ public class SnowflakeIdMachine {
      * 获得下一个ID (该方法是线程安全的)
      * @return SnowflakeId
      */
-    public synchronized long nextId() {
+    public synchronized long nextId() throws ClockMovedBackwardsException {
         long timestamp = timeGen();
 
         //如果当前时间小于上一次ID生成的时间戳，说明系统时钟回退过这个时候应当抛出异常
         if (timestamp < lastTimestamp) {
-            throw new RuntimeException(
-                    String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
+            throw new ClockMovedBackwardsException(lastTimestamp,timestamp);
         }
 
         //如果是同一时间生成的，则进行毫秒内序列
@@ -123,7 +121,7 @@ public class SnowflakeIdMachine {
         for (int i = 0; i < 1000; i++) {
             long id = idWorker.nextId();
             System.out.println(Long.toBinaryString(id));
-            System.out.println(id);
+            System.out.println(idWorker.timeGen()+"--"+id);
         }
     }
 }
